@@ -124,3 +124,56 @@ def load_prompts():
         prompts.append(data['prompt'])
 
     return prompts
+
+
+#######################################################################################################################
+# Paper Section 6.1 Method
+#######################################################################################################################
+def binary_search_extraction(llm, prompts, guess_token=0, bias=100, error=0.01):
+    """
+    Method described in section 6.1 (Guess one token version)
+    Incrementally construct logit vector by finding logit bias for each token that
+    causes it to be the the top-token (output with probability of 1 when temperature is 0).
+    """
+    vocab_size = len(llm.tokenizer)
+
+    # Assume we can only get the top token
+    top_token, original_logits = llm.generate(
+        prompts=prompts,
+        max_gen_len=1,
+        temperature=1e-5,
+    )
+
+    # We need top_logit so that we can calculate the remaining tokens' logit value.
+    top_logit = original_logits[0][top_token]
+
+    # Guess every token compare to the top token
+    if guess_token == top_token:
+        return top_logit
+
+    alpha = -bias
+    beta = bias
+    while beta - alpha > error:
+        mid = (alpha + beta) / 2
+
+        logitbias = {guess_token:mid}
+        cur_top_token, _ = llm.generate(
+            prompts=prompts,
+            max_gen_len=1,
+            temperature=1e-5,
+            logitbias=logitbias,
+        )
+
+        # I modify the code here to make it consistent with my logitbias implementation.
+        if cur_top_token == top_token:
+            alpha = mid
+        else:
+            beta = mid
+
+    guess_logit = top_logit - ((beta + alpha) / 2)
+
+    # Verify the guess
+    print(f"Token: {guess_token}, Original: {original_logits[0][guess_token]}, Guess: {guess_logit}")
+    assert abs(guess_logit - original_logits[0][guess_token]) <= error
+    
+    return guess_logit

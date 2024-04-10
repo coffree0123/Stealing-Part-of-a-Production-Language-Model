@@ -1,5 +1,5 @@
 from attack.llm_api import LLMAPI
-from attack.llm_attack import load_prompts, get_q, h_dim_extraction, layer_extraction
+from attack.llm_attack import load_prompts, get_q, h_dim_extraction, layer_extraction, binary_search_extraction
 
 
 if __name__ == '__main__':
@@ -39,4 +39,8 @@ if __name__ == '__main__':
     print("W_tilde: ")
     print(pred_w)
     print("W_tilde size: ", pred_w.size())
+    print("#######################")
+
+    print("###### Ch 6.1 ###########")
+    guess_logit = binary_search_extraction(llm, ["Hello, my name is"], guess_token=1, bias=100, error=0.01)
     print("#######################")

@@ -1,21 +1,30 @@
+import argparse
 from attack.llm_api import LLMAPI
 from attack.llm_attack import load_prompts, get_q, h_dim_extraction, layer_extraction, binary_search_extraction
 
 
 if __name__ == '__main__':
-    # Hyperparameters you can change.
-    model_name = "EleutherAI/gpt-neo-125m"
-    # This parameter need to be larger than the hidden dimension of the LLM model.
-    num_samples = 1000
+    parser = argparse.ArgumentParser(description='Experiment config')
+    parser.add_argument('--model_name', type=str, default="EleutherAI/gpt-neo-125m",
+                        help='LLM name that you want to attack.')
+    parser.add_argument('--num_samples', type=int, default=1000,
+                        help='Number of samples to generate, this parameter need to be larger than LLM hidden dimension size.')
+    parser.add_argument('--guess_token', type=int, default=1,
+                        help='Token to guess in ch 6.1.')
+    parser.add_argument('--bias', type=int, default=100,
+                        help='Bias value in ch 6.1.')
+    parser.add_argument('--error', type=float, default=0.01,
+                        help='Error value in ch 6.1.')
+    args = parser.parse_args()
 
-    # Start the attack
-    llm = LLMAPI(model_name)
+    # Start the attack.
+    llm = LLMAPI(args.model_name)
     prompts = load_prompts()
 
     q = get_q(
         llm=llm,
         prompts=prompts,
-        n=num_samples,
+        n=args.num_samples,
         batch_size=1,
     )
 
@@ -42,5 +51,7 @@ if __name__ == '__main__':
     print("#######################")
 
     print("###### Ch 6.1 ###########")
-    guess_logit = binary_search_extraction(llm, ["Hello, my name is"], guess_token=1, bias=100, error=0.01)
+    # Given one random prompt, guess the logits.
+    guess_logit = binary_search_extraction(
+        llm, ["Hello, my name is"], guess_token=1, bias=100, error=0.01)
     print("#######################")

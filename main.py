@@ -53,5 +53,5 @@ if __name__ == '__main__':
     print("###### Ch 6.1 ###########")
     # Given one random prompt, guess the logits.
     guess_logit = binary_search_extraction(
-        llm, ["Hello, my name is"], guess_token=1, bias=100, error=0.01)
+        llm, ["Hello, my name is"], guess_token=args.guess_token, bias=args.bias, error=args.error)
     print("#######################")

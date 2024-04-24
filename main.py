@@ -7,7 +7,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Experiment config')
     parser.add_argument('--model_name', type=str, default="EleutherAI/gpt-neo-125m",
                         help='LLM name that you want to attack.')
-    parser.add_argument('--num_samples', type=int, default=1000,
+    parser.add_argument('--num_samples', type=int, default=5000,
                         help='Number of samples to generate, this parameter need to be larger than LLM hidden dimension size.')
     parser.add_argument('--guess_token', type=int, default=1,
                         help='Token to guess in ch 6.1.')
@@ -33,6 +33,7 @@ if __name__ == '__main__':
         q=q,
     )
 
+    print(llm.model)
     print("###### Ch 4.1 ###########")
     print(f"Hidden Dim: {pred_dim}")
     print("#######################")

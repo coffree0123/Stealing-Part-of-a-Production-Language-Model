@@ -60,7 +60,9 @@ def direct_logits(
     Returns:
         q: matrix of logit vectors with size (n, l)
     """
-    q = torch.zeros(n, len(llm.tokenizer))
+    # Note: model.config.vocab_size can be different from the length of the tokenizer.
+    # model.config.vocab_size is used to define the size of word embedding and lm_head size.
+    q = torch.zeros(n, llm.model.config.vocab_size)
     for i, prompts in enumerate(tqdm(dataloader)):
         _, logits = llm.generate(prompts)
         q[i * batch_size:i * (batch_size + 1)] = logits

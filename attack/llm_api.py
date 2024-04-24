@@ -6,7 +6,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 class LLMAPI():
     def __init__(self, model_name: str = "EleutherAI/gpt-neo-125m"):
         self.model = AutoModelForCausalLM.from_pretrained(
-            model_name).to("cuda")
+            model_name, trust_remote_code=True, device_map="auto")
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
 
     def generate(
@@ -26,7 +26,8 @@ class LLMAPI():
             top_p (float, optional): Top-p probability threshold for nucleus sampling. Defaults to 0.9.
             logitbias (dict, optional): Tokens and the associated biases to be added to appropriate output logits.  Defaults to None.
         """
-        inputs = self.tokenizer(prompts, return_tensors="pt").to("cuda")
+        inputs = self.tokenizer(
+            prompts, return_tensors="pt").to(self.model.device)
 
         out = self.model.generate(**inputs, max_new_tokens=max_gen_len, return_dict_in_generate=True,
                                   output_logits=True, pad_token_id=self.tokenizer.eos_token_id, temperature=temperature, do_sample=True)
